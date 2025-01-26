@@ -1,0 +1,70 @@
+{
+  "projectContext": {
+    "description": "Collaborative rich-text note-taking platform with version history and real-time previews. Key characteristics:",
+    "additionalInformation": "Move slowly aboutn backend development. Explain the process, do not try to write everyhing at once. Move step by step.",
+    "domainModel": {
+      "coreEntities": {
+        "User": {
+          "fields": ["id", "email (hashed)", "password (bcrypt)", "created_at"],
+          "relations": ["Note:hasMany"]
+        },
+        "Note": {
+          "fields": ["id", "title", "content_delta (JSON)", "html_snapshot", "version", "collaborators (User IDs)"],
+          "methods": ["sanitizeContent()", "compressDelta()", "renderHtml()"]
+        }
+      }
+    },
+    "architecture": {
+      "frontend": {
+        "technology": "NextJS 15 with app folder",
+        "pattern": "Feature-Sliced Design",
+        "editor": {
+          "quill": {
+            "deltaHandling": "Store raw ops + compressed weekly snapshots",
+            "plugins": ["image-resize-module", "markdown-shortcuts"],
+            "security": "Content sanitization pipeline: Quill → Delta → DOMPurify → Bluemonday"
+          }
+        },
+        "dataFlow": "Zustand ← TanStack Query → Next.js API Routes → Go backend",
+        "components":{
+          "ui":"shadcn/ui",
+          "form":"use new react action as possible",
+          "http request":"tanstack query"
+        }
+
+      },
+      "backend": {
+        "pattern": "Clean Architecture (Use Cases + Repositories)",
+        "deltaProcessing": {
+          "pipeline": [
+            "Validate incoming delta",
+            "Merge with current version",
+            "Sanitize HTML output",
+            "Generate preview text",
+            "Update search index"
+          ]
+        }
+      }
+    },
+    "keyDecisions": {
+      "editor": "Chose Quill over alternatives because:",
+      "reasons": [
+        "Built-in delta format for efficient collaboration",
+        "Rich text formatting suitable for non-technical users",
+        "Active community and plugin ecosystem"
+      ],
+      "tradeoffs": [
+        "Larger bundle size vs. Markdown editors",
+        "Delta storage complexity vs. simple HTML"
+      ]
+    },
+    "collaboration": {
+      "realtime": {
+        "shortTerm": "Polling every 30s with version checks",
+        "longTerm": "WebSocket-based OT using sharedb-quill-backend"
+      },
+      "conflictResolution": "Last-write-wins with version mismatch errors"
+    }
+  }
+}
+
