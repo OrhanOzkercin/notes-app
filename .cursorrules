@@ -5,12 +5,30 @@
     "domainModel": {
       "coreEntities": {
         "User": {
-          "fields": ["id", "email (hashed)", "password (bcrypt)", "created_at"],
-          "relations": ["Note:hasMany"]
+          "fields": [
+            "id",
+            "email (hashed)",
+            "password (bcrypt)",
+            "created_at"
+          ],
+          "relations": [
+            "Note:hasMany"
+          ]
         },
         "Note": {
-          "fields": ["id", "title", "content_delta (JSON)", "html_snapshot", "version", "collaborators (User IDs)"],
-          "methods": ["sanitizeContent()", "compressDelta()", "renderHtml()"]
+          "fields": [
+            "id",
+            "title",
+            "content_delta (JSON)",
+            "html_snapshot",
+            "version",
+            "collaborators (User IDs)"
+          ],
+          "methods": [
+            "sanitizeContent()",
+            "compressDelta()",
+            "renderHtml()"
+          ]
         }
       }
     },
@@ -21,17 +39,36 @@
         "editor": {
           "quill": {
             "deltaHandling": "Store raw ops + compressed weekly snapshots",
-            "plugins": ["image-resize-module", "markdown-shortcuts"],
+            "plugins": [
+              "image-resize-module",
+              "markdown-shortcuts"
+            ],
             "security": "Content sanitization pipeline: Quill → Delta → DOMPurify → Bluemonday"
           }
         },
         "dataFlow": "Zustand ← TanStack Query → Next.js API Routes → Go backend",
-        "components":{
-          "ui":"shadcn/ui",
-          "form":"use new react action as possible",
-          "http request":"tanstack query"
+        "components": {
+          "ui": "shadcn/ui",
+          "form": "use new react action as possible",
+          "http request": "tanstack query"
+        },
+        "customRules": {
+          "uiLibrary": "shadcn/ui",
+          "useTailwind": true,
+          "tailwindConfigPath": "tailwind.config.js",
+          "enforceAccessibility": true
+        },
+        "designSystem": {
+          "enforceDesignTokens": true,
+          "typography": {
+            "sizes": "Follow typography scale defined in design-tokens",
+            "weights": "Use font weights from design-tokens"
+          },
+          "components": {
+            "preferCustom": false,
+            "description": "Always try to use shadcn/ui components. If we need to make adjustments, create reusable components use shadcn/ui in this component."
+          }
         }
-
       },
       "backend": {
         "pattern": "Clean Architecture (Use Cases + Repositories)",

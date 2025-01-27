@@ -8,6 +8,12 @@ export default {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+		container:{
+			center: true,
+		},
+		fontFamily: {
+			cal: ["var(--font-cal)"],
+		},
   	extend: {
   		colors: {
   			background: 'hsl(var(--background))',
