@@ -2,12 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Toaster } from "@/components/ui/toaster";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import localFont from 'next/font/local';
+import { RootLayoutContent } from "@/components/layout/root-layout-content";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 const cal = localFont({
   src: "../../public/fonts/CalSans-SemiBold.woff2",
@@ -28,12 +26,7 @@ export default function RootLayout({
     <html lang="en" className={cal.variable}>
       <body className={inter.className}>
         <Providers>
-          <div className="relative flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-          <Toaster />
+          <RootLayoutContent>{children}</RootLayoutContent>
         </Providers>
       </body>
     </html>

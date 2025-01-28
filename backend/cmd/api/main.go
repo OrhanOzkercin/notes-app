@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path/filepath"
 
 	httpHandler "notes-app/backend/internal/delivery/http"
 	"notes-app/backend/internal/delivery/http/middleware"
+	noteHandler "notes-app/backend/internal/delivery/http/note"
 	"notes-app/backend/internal/infrastructure/config"
+	"notes-app/backend/internal/infrastructure/migration"
 	"notes-app/backend/internal/infrastructure/repository/postgres"
+	"notes-app/backend/internal/usecase/note"
 	"notes-app/backend/internal/usecase/user"
 
 	"github.com/joho/godotenv"
@@ -23,9 +27,26 @@ func main() {
 	// Load configuration
 	cfg := config.LoadConfig()
 
-	// Debug: Print database configuration
-	log.Printf("Database Config - Host: %s, Port: %d, User: %s, DBName: %s\n",
-		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.DBName)
+	// Get absolute path to migrations directory
+	migrationsPath, err := filepath.Abs("migrations")
+	if err != nil {
+		log.Fatalf("Failed to get migrations path: %v", err)
+	}
+
+	// Initialize migration runner
+	runner, err := migration.NewRunner(migration.Config{
+		DatabaseURL:    cfg.Database.URL(),
+		MigrationsPath: migrationsPath,
+	})
+	if err != nil {
+		log.Fatalf("Failed to create migration runner: %v", err)
+	}
+	defer runner.Close()
+
+	// Run migrations
+	if err := runner.Up(); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
 
 	// Initialize database
 	db, err := config.NewDatabase(cfg.Database)
@@ -34,16 +55,21 @@ func main() {
 	}
 	defer db.Close()
 	log.Printf("Database connected")
-	// Initialize repository
+
+	// Initialize repositories
 	userRepo := postgres.NewUserRepository(db)
-	log.Printf("User repository initialized")
-	// Initialize use case
+	noteRepo := postgres.NewNoteRepository(db)
+	log.Printf("Repositories initialized")
+
+	// Initialize use cases
 	userUseCase := user.NewUseCase(userRepo, user.Config{
 		JWTSecret: cfg.JWT.Secret,
 	})
+	noteUseCase := note.NewUseCase(noteRepo)
 
-	// Initialize handler
+	// Initialize handlers
 	userHandler := httpHandler.NewUserHandler(userUseCase)
+	noteHandler := noteHandler.NewHandler(noteUseCase, cfg.JWT.Secret)
 
 	// Create router (using default mux for simplicity)
 	mux := http.NewServeMux()
@@ -51,6 +77,7 @@ func main() {
 	// Set up routes
 	mux.HandleFunc("/api/v1/auth/register", userHandler.Register)
 	mux.HandleFunc("/api/v1/auth/login", userHandler.Login)
+	noteHandler.Register(mux)
 
 	// Create middleware chain
 	handler := middleware.CORSMiddleware(cfg.Server.AllowedOrigins)(mux)

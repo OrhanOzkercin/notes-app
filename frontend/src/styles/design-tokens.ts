@@ -12,6 +12,8 @@ export const tokens = {
       700: '#1D4ED8',
       800: '#1E40AF',
       900: '#1E3A8A',
+      DEFAULT: 'hsl(var(--primary))',
+      foreground: 'hsl(var(--primary-foreground))',
     },
     // Accent Colors - Electric Purple
     accent: {
@@ -25,6 +27,8 @@ export const tokens = {
       700: '#6D28D9',
       800: '#5B21B6',
       900: '#4C1D95',
+      DEFAULT: 'hsl(var(--accent))',
+      foreground: 'hsl(var(--accent-foreground))',
     },
     // Secondary - Vibrant Teal
     secondary: {
@@ -38,6 +42,8 @@ export const tokens = {
       700: '#0F766E',
       800: '#115E59',
       900: '#134E4A',
+      DEFAULT: 'hsl(var(--secondary))',
+      foreground: 'hsl(var(--secondary-foreground))',
     },
     // Neutral Colors - Warm Gray
     neutral: {
@@ -57,16 +63,55 @@ export const tokens = {
       50: '#ECFDF5',
       500: '#10B981',
       700: '#047857',
+      DEFAULT: '#10B981',
+      light: '#D1FAE5',
+      dark: '#059669',
     },
     error: {
       50: '#FEF2F2',
       500: '#EF4444',
       700: '#B91C1C',
+      DEFAULT: '#EF4444',
+      light: '#FEE2E2',
+      dark: '#DC2626',
     },
     warning: {
       50: '#FFFBEB',
       500: '#F59E0B',
       700: '#B45309',
+      DEFAULT: '#F59E0B',
+      light: '#FEF3C7',
+      dark: '#D97706',
+    },
+    // UI System Colors
+    background: 'hsl(var(--background))',
+    foreground: 'hsl(var(--foreground))',
+    card: {
+      DEFAULT: 'hsl(var(--card))',
+      foreground: 'hsl(var(--card-foreground))',
+    },
+    popover: {
+      DEFAULT: 'hsl(var(--popover))',
+      foreground: 'hsl(var(--popover-foreground))',
+    },
+    muted: {
+      DEFAULT: 'hsl(var(--muted))',
+      foreground: 'hsl(var(--muted-foreground))',
+    },
+    destructive: {
+      DEFAULT: 'hsl(var(--destructive))',
+      foreground: 'hsl(var(--destructive-foreground))',
+    },
+    border: 'hsl(var(--border))',
+    input: 'hsl(var(--input))',
+    ring: 'hsl(var(--ring))',
+    // Chart Colors
+    chart: {
+      1: 'hsl(var(--chart-1))',
+      2: 'hsl(var(--chart-2))',
+      3: 'hsl(var(--chart-3))',
+      4: 'hsl(var(--chart-4))',
+      5: 'hsl(var(--chart-5))',
     },
   },
   typography: {
@@ -75,6 +120,8 @@ export const tokens = {
       sans: 'var(--font-inter)',
       display: 'var(--font-cal)', // We'll add Cal Sans for headings
       mono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+      cal: 'var(--font-cal)',
+      inter: 'var(--font-inter)',
     },
     sizes: {
       // Refined type scale
@@ -112,6 +159,12 @@ export const tokens = {
       wide: '0.025em',
       wider: '0.05em',
       widest: '0.1em',
+    },
+    fontWeights: {
+      normal: '400',
+      medium: '500',
+      semibold: '600',
+      bold: '700',
     },
   },
   spacing: {
@@ -164,5 +217,10 @@ export const tokens = {
     DEFAULT: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
     fast: '100ms cubic-bezier(0.4, 0, 0.2, 1)',
     slow: '300ms cubic-bezier(0.4, 0, 0.2, 1)',
+  },
+  animation: {
+    DEFAULT: '0.2s ease-out',
+    fast: '0.1s ease-out',
+    slow: '0.3s ease-out',
   },
 } as const; 

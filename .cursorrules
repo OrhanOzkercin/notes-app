@@ -1,7 +1,17 @@
 {
   "projectContext": {
     "description": "Collaborative rich-text note-taking platform with version history and real-time previews. Key characteristics:",
-    "additionalInformation": "Move slowly aboutn backend development. Explain the process, do not try to write everyhing at once. Move step by step.",
+    "additionalInformation": "User has limited backend development experience. Need to:",
+    "developmentApproach": {
+      "explanation": "Move slowly with backend development, explaining each step thoroughly. Consider:",
+      "points": [
+        "Explain database concepts and SQL operations",
+        "Break down complex backend patterns into simpler terms",
+        "Show how data flows from API routes to database",
+        "Explain why certain patterns/practices are used",
+        "Document each step in comments for future reference"
+      ]
+    },
     "domainModel": {
       "coreEntities": {
         "User": {
@@ -19,14 +29,14 @@
           "fields": [
             "id",
             "title",
-            "content_delta (JSON)",
+            "content_json",
             "html_snapshot",
             "version",
             "collaborators (User IDs)"
           ],
           "methods": [
             "sanitizeContent()",
-            "compressDelta()",
+            "compressJson()",
             "renderHtml()"
           ]
         }
@@ -36,70 +46,112 @@
       "frontend": {
         "technology": "NextJS 15 with app folder",
         "pattern": "Feature-Sliced Design",
-        "editor": {
-          "quill": {
-            "deltaHandling": "Store raw ops + compressed weekly snapshots",
-            "plugins": [
-              "image-resize-module",
-              "markdown-shortcuts"
+        "bestPractices": {
+          "serverComponents": {
+            "description": "Keep components server-side by default, especially layouts",
+            "rules": [
+              "Root layout must be a server component",
+              "Only add 'use client' when component needs client-side features",
+              "Keep providers and client-side logic in separate client components",
+              "Split components to maximize server-side rendering"
             ],
-            "security": "Content sanitization pipeline: Quill → Delta → DOMPurify → Bluemonday"
+            "benefits": [
+              "Better performance",
+              "Smaller bundle size",
+              "Faster initial page load",
+              "Better SEO"
+            ]
+          },
+          "providers": {
+            "description": "Organize providers to maximize server-side rendering",
+            "rules": [
+              "Keep client-side providers (React Query, Toaster, etc.) in a separate ClientProviders component",
+              "Keep layout components as server components",
+              "Wrap only the necessary parts of the app with client-side providers",
+              "Use composition to keep provider logic separate from layout logic"
+            ],
+            "example": {
+              "bad": "Making RootLayoutContent a client component affects all children",
+              "good": "Separate ClientProviders component keeps layout server-side"
+            }
+          }
+        },
+        "editor": {
+          "tiptap": {
+            "extensions": [
+              "StarterKit",
+              "Image",
+              "TaskList",
+              "TaskItem",
+              "Link"
+            ],
+            "configuration": {
+              "typography": {
+                "required": "@tailwindcss/typography plugin",
+                "classes": "prose prose-slate dark:prose-invert prose-headings:font-cal",
+                "customization": "Use theme.extend.typography in tailwind.config.ts"
+              },
+              "taskLists": {
+                "classes": {
+                  "list": "not-prose pl-2",
+                  "item": "flex items-start my-4"
+                },
+                "configuration": {
+                  "nested": true
+                }
+              },
+              "headings": {
+                "levels": [1, 2],
+                "classes": "font-cal"
+              }
+            },
+            "security": "Content sanitization through Tiptap's built-in sanitization"
           }
         },
         "dataFlow": "Zustand ← TanStack Query → Next.js API Routes → Go backend",
         "components": {
           "ui": "shadcn/ui",
           "form": "use new react action as possible",
-          "http request": "tanstack query"
+          "http request": "tanstack query",
+          "notifications": {
+            "library": "sonner",
+            "description": "Use sonner for toast notifications instead of custom implementation",
+            "reasons": [
+              "Lightweight and performant",
+              "Better TypeScript support",
+              "Modern design that matches our UI",
+              "Easy to customize with our design system",
+              "Built-in accessibility features"
+            ],
+            "usage": {
+              "success": "toast.success('Message')",
+              "error": "toast.error('Message')",
+              "promise": "toast.promise(promise, { loading: 'Loading...', success: 'Success!', error: 'Error!' })"
+            }
+          }
         },
-        "customRules": {
-          "uiLibrary": "shadcn/ui",
-          "useTailwind": true,
-          "tailwindConfigPath": "tailwind.config.js",
-          "enforceAccessibility": true
+        "setup": {
+          "tailwind": {
+            "configFile": "tailwind.config.ts",
+            "requiredPlugins": [
+              "@tailwindcss/typography",
+              "tailwindcss-animate"
+            ],
+            "commonIssues": [
+              "Multiple config files (use .ts version)",
+              "Missing typography plugin",
+              "Incorrect prose classes",
+              "Dark mode configuration"
+            ]
+          }
         },
         "designSystem": {
-          "enforceDesignTokens": true,
-          "typography": {
-            "sizes": "Follow typography scale defined in design-tokens",
-            "weights": "Use font weights from design-tokens",
-            "hierarchy": {
-              "headings": {
-                "font": "Cal Sans (var(--font-cal))",
-                "scale": {
-                  "h1": "text-4xl (2.25rem)",
-                  "h2": "text-3xl (1.875rem)",
-                  "h3": "text-2xl (1.5rem)"
-                },
-                "weight": "semibold"
-              },
-              "body": {
-                "font": "Inter (var(--font-inter))",
-                "scale": {
-                  "default": "text-base (1rem)",
-                  "large": "text-lg (1.125rem)",
-                  "small": "text-sm (0.875rem)",
-                  "xs": "text-xs (0.75rem)"
-                },
-                "lineHeight": {
-                  "default": "normal (1.5)",
-                  "content": "relaxed (1.625)"
-                }
-              }
-            },
-            "usage": {
-              "noteContent": "body.default with content lineHeight",
-              "metadata": "body.small",
-              "ui": "body.default",
-              "buttons": "body.default",
-              "captions": "body.xs"
-            }
-          },
           "colors": {
-            "usage": {
+            "brand": {
               "primary": {
-                "description": "Brand color, main interactive elements",
-                "use": [
+                "description": "Vibrant Blue - Main brand color",
+                "scale": "50-900 for light to dark variants",
+                "usage": [
                   "Primary buttons",
                   "Important links",
                   "Active states",
@@ -107,143 +159,185 @@
                 ]
               },
               "accent": {
-                "description": "Complementary color for emphasis",
-                "use": [
+                "description": "Electric Purple - Secondary brand color",
+                "scale": "50-900 for light to dark variants",
+                "usage": [
                   "Highlights",
                   "Secondary actions",
-                  "Success states",
-                  "Progress indicators"
+                  "Success states"
                 ]
               },
               "secondary": {
-                "description": "Supporting UI elements",
-                "use": [
+                "description": "Vibrant Teal - Supporting brand color",
+                "scale": "50-900 for light to dark variants",
+                "usage": [
+                  "Supporting UI elements",
                   "Backgrounds",
-                  "Borders",
-                  "Less important UI elements",
-                  "Disabled states"
-                ]
-              },
-              "neutral": {
-                "description": "Text and background colors",
-                "use": [
-                  "Body text",
-                  "Backgrounds",
-                  "Borders",
-                  "Dividers"
+                  "Borders"
                 ]
               }
             },
-            "darkMode": {
-              "strategy": "Maintain brand colors in dark mode, adjust background/text for contrast",
-              "rules": [
-                "Ensure WCAG AA contrast ratios",
-                "Keep primary brand colors consistent",
-                "Adjust background/text colors for readability",
-                "Use darker shades for elevated surfaces"
-              ]
+            "semantic": {
+              "success": {
+                "description": "Green - Positive actions/states",
+                "variants": ["light", "DEFAULT", "dark"]
+              },
+              "error": {
+                "description": "Red - Negative actions/states",
+                "variants": ["light", "DEFAULT", "dark"]
+              },
+              "warning": {
+                "description": "Orange - Cautionary actions/states",
+                "variants": ["light", "DEFAULT", "dark"]
+              }
+            },
+            "neutral": {
+              "description": "Warm Gray - Text and UI elements",
+              "scale": "50-900 for light to dark variants"
+            },
+            "system": {
+              "background": "Base page background",
+              "foreground": "Primary text color",
+              "card": "Card component colors",
+              "popover": "Dropdown/popover colors",
+              "muted": "Subtle UI elements",
+              "destructive": "Dangerous actions",
+              "border": "Border colors",
+              "input": "Form input colors",
+              "ring": "Focus ring colors"
+            },
+            "chart": {
+              "description": "Data visualization colors",
+              "scale": "1-5 for different chart elements"
+            }
+          },
+          "typography": {
+            "fonts": {
+              "cal": "Cal Sans for headings (var(--font-cal))",
+              "inter": "Inter for body text (var(--font-inter))",
+              "mono": "Monospace for code"
+            },
+            "sizes": {
+              "scale": {
+                "xs": "0.75rem (12px)",
+                "sm": "0.875rem (14px)",
+                "base": "1rem (16px)",
+                "lg": "1.125rem (18px)",
+                "xl": "1.25rem (20px)",
+                "2xl": "1.5rem (24px)",
+                "3xl": "1.875rem (30px)",
+                "4xl": "2.25rem (36px)",
+                "5xl": "3rem (48px)",
+                "6xl": "3.75rem (60px)",
+                "7xl": "4.5rem (72px)"
+              }
+            },
+            "weights": {
+              "normal": "400",
+              "medium": "500",
+              "semibold": "600",
+              "bold": "700",
+              "extrabold": "800"
+            },
+            "lineHeights": {
+              "none": "1",
+              "tight": "1.25",
+              "snug": "1.375",
+              "normal": "1.5",
+              "relaxed": "1.625",
+              "loose": "2"
+            },
+            "letterSpacing": {
+              "tighter": "-0.05em",
+              "tight": "-0.025em",
+              "normal": "0em",
+              "wide": "0.025em",
+              "wider": "0.05em",
+              "widest": "0.1em"
             }
           },
           "spacing": {
-            "scale": {
-              "description": "Follow consistent spacing scale from design tokens",
-              "base": "4px (0.25rem)",
-              "increments": "Multiply by 2 for each step (4px, 8px, 16px, etc.)"
-            },
-            "usage": {
-              "layout": {
-                "container": {
-                  "max-width": "1280px (screens.xl)",
-                  "padding": {
-                    "mobile": "16px (spacing.4)",
-                    "desktop": "24px (spacing.6)"
-                  }
-                },
-                "grid": {
-                  "gap": {
-                    "mobile": "16px (spacing.4)",
-                    "desktop": "24px (spacing.6)"
-                  }
-                }
-              },
-              "components": {
-                "padding": {
-                  "buttons": "8px 16px (spacing.2 spacing.4)",
-                  "cards": "16px (spacing.4)",
-                  "sections": "24px (spacing.6)"
-                },
-                "margin": {
-                  "between-sections": "32px (spacing.8)",
-                  "between-elements": "16px (spacing.4)"
-                },
-                "gap": {
-                  "form-fields": "16px (spacing.4)",
-                  "list-items": "8px (spacing.2)"
-                }
-              }
-            }
+            "scale": "0-24 (0rem to 6rem)",
+            "increments": "0.25rem (4px) steps"
           },
-          "layout": {
-            "containers": {
-              "note-editor": {
-                "max-width": "800px",
-                "padding": "24px (spacing.6)"
-              },
-              "note-list": {
-                "grid": {
-                  "columns": {
-                    "mobile": "1",
-                    "tablet": "2",
-                    "desktop": "3"
-                  },
-                  "gap": "24px (spacing.6)"
-                }
-              }
-            },
-            "breakpoints": {
-              "mobile": "< 640px",
-              "tablet": "640px - 1024px",
-              "desktop": "> 1024px"
-            }
+          "breakpoints": {
+            "sm": "640px",
+            "md": "768px",
+            "lg": "1024px",
+            "xl": "1280px",
+            "2xl": "1536px"
           },
-          "components": {
-            "preferCustom": false,
-            "description": "Always try to use shadcn/ui components. If we need to make adjustments, create reusable components use shadcn/ui in this component.",
-            "usage": {
-              "buttons": {
-                "primary": "Use shadcn Button with variant='default'",
-                "secondary": "Use shadcn Button with variant='secondary'",
-                "destructive": "Use shadcn Button with variant='destructive'",
-                "ghost": "Use shadcn Button with variant='ghost' for subtle actions"
-              },
-              "inputs": {
-                "text": "Use shadcn Input component with proper aria-labels",
-                "textarea": "Use shadcn Textarea for multi-line content",
-                "select": "Use shadcn Select for dropdowns"
-              },
-              "dialogs": {
-                "default": "Use shadcn Dialog for modals",
-                "alerts": "Use shadcn AlertDialog for destructive actions"
-              },
-              "cards": {
-                "note": "Use shadcn Card with consistent padding (spacing.4)",
-                "preview": "Use shadcn Card with hover state for note previews"
-              },
-              "customization": {
-                "approach": "When customizing shadcn components:",
-                "steps": [
-                  "Extend existing variants instead of creating new ones",
-                  "Use design tokens for colors and spacing",
-                  "Maintain accessibility features",
-                  "Document any customizations in the component"
-                ]
-              }
-            }
+          "radii": {
+            "none": "0",
+            "sm": "0.125rem",
+            "DEFAULT": "0.25rem",
+            "md": "0.375rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          "shadows": {
+            "sm": "Small shadow for subtle elevation",
+            "DEFAULT": "Default shadow for cards",
+            "md": "Medium shadow for dropdowns",
+            "lg": "Large shadow for modals",
+            "xl": "Extra large shadow for popovers"
+          },
+          "transitions": {
+            "DEFAULT": "150ms cubic-bezier(0.4, 0, 0.2, 1)",
+            "fast": "100ms cubic-bezier(0.4, 0, 0.2, 1)",
+            "slow": "300ms cubic-bezier(0.4, 0, 0.2, 1)"
+          },
+          "animation": {
+            "DEFAULT": "0.2s ease-out",
+            "fast": "0.1s ease-out",
+            "slow": "0.3s ease-out"
           }
         }
       },
       "backend": {
         "pattern": "Clean Architecture (Use Cases + Repositories)",
+        "routing": {
+          "convention": "Standard http.ServeMux",
+          "description": "Use Go's standard library http.ServeMux for routing to maintain consistency",
+          "reasons": [
+            "Simpler maintenance with standard library",
+            "Sufficient for our REST API needs",
+            "No external dependencies for core routing",
+            "Better for onboarding new developers"
+          ],
+          "implementation": {
+            "baseHandler": {
+              "structure": "Each handler package should have its own Handler struct",
+              "example": "type Handler struct { useCase *note.UseCase }",
+              "registration": "Register method to set up routes with http.ServeMux"
+            },
+            "routing": {
+              "pattern": "All routes should be prefixed with /api/v1/",
+              "methods": "Use switch on r.Method for handling different HTTP methods",
+              "parameters": "Use strings.TrimPrefix for path parameter extraction"
+            },
+            "middleware": {
+              "auth": "Use AuthMiddleware for protected routes",
+              "cors": "Apply CORSMiddleware at the application level"
+            }
+          },
+          "commonPitfalls": {
+            "routerMixing": {
+              "problem": "Mixing different router implementations (e.g., Chi with standard mux)",
+              "solution": "Stick to http.ServeMux throughout the application"
+            },
+            "pathHandling": {
+              "problem": "Inconsistent path handling with trailing slashes",
+              "solution": "Always use trailing slash in route definitions"
+            },
+            "middlewareOrder": {
+              "problem": "Incorrect middleware ordering",
+              "solution": "Apply authentication before route handling"
+            }
+          }
+        },
         "deltaProcessing": {
           "pipeline": [
             "Validate incoming delta",
@@ -256,15 +350,19 @@
       }
     },
     "keyDecisions": {
-      "editor": "Chose Quill over alternatives because:",
+      "sanitization": "Always sanitize the content before storing it in the database.",
+      "editor": "Chose Tiptap over alternatives because:",
       "reasons": [
-        "Built-in delta format for efficient collaboration",
-        "Rich text formatting suitable for non-technical users",
-        "Active community and plugin ecosystem"
+        "Modern, headless and extensible architecture",
+        "First-class TypeScript support",
+        "Built on ProseMirror for reliability",
+        "Active community and extensive documentation",
+        "Built-in collaboration features"
       ],
       "tradeoffs": [
-        "Larger bundle size vs. Markdown editors",
-        "Delta storage complexity vs. simple HTML"
+        "More setup required vs simpler editors",
+        "Larger initial learning curve",
+        "JSON-based content storage"
       ]
     },
     "collaboration": {

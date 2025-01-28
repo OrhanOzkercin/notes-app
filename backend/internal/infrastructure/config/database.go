@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 	"fmt"
+
 	_ "github.com/lib/pq"
 )
 
@@ -15,14 +16,14 @@ type DatabaseConfig struct {
 	DBName   string
 }
 
+// URL returns the PostgreSQL connection URL
+func (c DatabaseConfig) URL() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		c.User, c.Password, c.Host, c.Port, c.DBName)
+}
+
 // NewDatabase creates a new database connection
 func NewDatabase(config DatabaseConfig) (*sql.DB, error) {
-	// Create connection string with all necessary parameters
-	dsn := fmt.Sprintf(
-		"postgresql://%s:%s@%s:%d/%s?sslmode=disable",
-		config.User, config.Password, config.Host, config.Port, config.DBName,
-	)
-
 	// Debug connection string (without password)
 	debugDsn := fmt.Sprintf(
 		"postgresql://%s:****@%s:%d/%s?sslmode=disable",
@@ -31,7 +32,7 @@ func NewDatabase(config DatabaseConfig) (*sql.DB, error) {
 	fmt.Printf("Attempting to connect with: %s\n", debugDsn)
 
 	// Open connection
-	db, err := sql.Open("postgres", dsn)
+	db, err := sql.Open("postgres", config.URL())
 	if err != nil {
 		return nil, fmt.Errorf("error opening database: %w", err)
 	}
@@ -46,4 +47,4 @@ func NewDatabase(config DatabaseConfig) (*sql.DB, error) {
 	}
 
 	return db, nil
-} 
+}

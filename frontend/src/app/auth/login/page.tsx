@@ -1,79 +1,50 @@
 'use client'
 
-import { AuthForm } from '../components/auth-form'
-import Link from 'next/link'
-import { useMutation } from '@tanstack/react-query'
-import { authApi } from '@/lib/api'
+import { AuthForm } from '@/app/auth/components/auth-form'
+import { useAuth } from '@/lib/auth'
+import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { APIException } from '@/lib/types/api'
-import { useToast } from '@/hooks/use-toast'
+import { useMutation } from '@tanstack/react-query'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { toast } = useToast()
-  
-  const { mutate: login, isPending } = useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      authApi.login(email, password),
-    onSuccess: (data) => {
-      localStorage.setItem('token', data.token)
-      toast({
-        title: "Success",
-        description: "You have been logged in successfully",
-      })
-      router.push('/')
+  const { login } = useAuth()
+
+  const { mutate: handleLogin, isPending } = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      await login(data.email, data.password)
     },
-    onError: (error) => {
-      console.log("LoginPage -> error:", error)
-      if (error instanceof APIException) {
-        // Handle specific error codes
-        if (error.hasErrorCode('INVALID_CREDENTIALS')) {
-          toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description: "Invalid email or password. Please try again.",
-          })
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: error.message,
-          })
-        }
-        
-        // Log error for debugging (in development)
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Login error:', {
-            message: error.message,
-            requestId: error.requestId,
-            errors: error.errors,
-          })
-        }
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "An unexpected error occurred. Please try again.",
-        })
-      }
+    onSuccess: () => {
+      toast.success('Successfully logged in')
+      router.push('/dashboard')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to log in')
     },
   })
 
-  const handleLogin = (email: string, password: string) => {
-    login({ email, password })
-  }
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
-      <div className="max-w-md w-full">
-        <h1 className="text-4xl font-bold text-center mb-2">Welcome Back</h1>
-        <p className="text-center text-gray-600 mb-8">
+    <div className="container flex h-[calc(100vh-3.5rem)] items-center justify-center">
+      <div className="w-full max-w-[350px] space-y-6">
+        <div className="flex flex-col space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Notes
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Enter your email to sign in to your account
+          </p>
+        </div>
+        <AuthForm onSubmit={handleLogin} isLoading={isPending} />
+        <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
-          <Link href="/auth/register" className="text-blue-600 hover:underline">
+          <Link
+            href="/auth/register"
+            className="underline underline-offset-4 hover:text-primary"
+          >
             Sign up
           </Link>
         </p>
-        <AuthForm mode="login" onSubmit={handleLogin} isLoading={isPending} />
       </div>
     </div>
   )

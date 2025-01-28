@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 import { tokens } from "./src/styles/design-tokens";
 import animate from "tailwindcss-animate";
+import typographyPlugin from "@tailwindcss/typography";
 
 export default {
     darkMode: ["class"],
@@ -72,8 +73,63 @@ export default {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: 'none',
+            color: 'hsl(var(--foreground))',
+            hr: {
+              borderColor: 'hsl(var(--border))',
+              marginTop: '3em',
+              marginBottom: '3em',
+            },
+            'h1, h2, h3': {
+              letterSpacing: '-0.025em',
+            },
+            h2: {
+              marginBottom: '1em',
+            },
+            h3: {
+              marginTop: '1.5em',
+              marginBottom: '0.5em',
+            },
+            li: {
+              marginTop: '0.5em',
+              marginBottom: '0.5em',
+            },
+            'ul > li': {
+              paddingLeft: '1.5em',
+              position: 'relative',
+            },
+            'ul > li::before': {
+              content: '""',
+              width: '0.5em',
+              height: '0.125em',
+              position: 'absolute',
+              top: 'calc(0.875em - 0.0625em)',
+              left: 0,
+              borderRadius: '999px',
+              backgroundColor: 'hsl(var(--foreground))',
+            },
+          },
+        },
+      },
   	}
   },
-  plugins: [animate],
+  plugins: [animate, typographyPlugin],
 } satisfies Config;
