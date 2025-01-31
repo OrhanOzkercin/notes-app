@@ -12,6 +12,8 @@ In this application there are 4 major phases we need to implement:
 Before implementing any feature, check the codebase and see if there is a similar feature. If there is, use it.
 Try to create reusable components and functions.
 
+Always suggest the commit message and the documentation for the feature.
+
 
 # Project Context
 
