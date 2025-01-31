@@ -58,6 +58,14 @@ func (r *Runner) Version() (uint, bool, error) {
 	return r.migrate.Version()
 }
 
+// Force sets a version without running migrations
+func (r *Runner) Force(version int) error {
+	if err := r.migrate.Force(version); err != nil {
+		return fmt.Errorf("failed to force version: %w", err)
+	}
+	return nil
+}
+
 // Close closes the migration runner
 func (r *Runner) Close() error {
 	srcErr, dbErr := r.migrate.Close()

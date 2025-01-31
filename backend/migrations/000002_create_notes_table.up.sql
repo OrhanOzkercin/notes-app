@@ -31,7 +31,7 @@ CREATE INDEX idx_notes_user_id ON notes(user_id);
 CREATE INDEX idx_notes_collaborators ON notes USING gin(collaborators);
 
 -- Add updated_at trigger
-CREATE OR REPLACE FUNCTION update_updated_at_column()
+CREATE OR REPLACE FUNCTION update_notes_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
@@ -42,4 +42,4 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_notes_updated_at
     BEFORE UPDATE ON notes
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+    EXECUTE FUNCTION update_notes_updated_at_column();
