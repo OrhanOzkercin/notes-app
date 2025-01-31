@@ -101,7 +101,10 @@
                 }
               },
               "headings": {
-                "levels": [1, 2],
+                "levels": [
+                  1,
+                  2
+                ],
                 "classes": "font-cal"
               }
             },
@@ -180,15 +183,27 @@
             "semantic": {
               "success": {
                 "description": "Green - Positive actions/states",
-                "variants": ["light", "DEFAULT", "dark"]
+                "variants": [
+                  "light",
+                  "DEFAULT",
+                  "dark"
+                ]
               },
               "error": {
                 "description": "Red - Negative actions/states",
-                "variants": ["light", "DEFAULT", "dark"]
+                "variants": [
+                  "light",
+                  "DEFAULT",
+                  "dark"
+                ]
               },
               "warning": {
                 "description": "Orange - Cautionary actions/states",
-                "variants": ["light", "DEFAULT", "dark"]
+                "variants": [
+                  "light",
+                  "DEFAULT",
+                  "dark"
+                ]
               }
             },
             "neutral": {
@@ -374,4 +389,3 @@
     }
   }
 }
-
